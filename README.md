@@ -12,43 +12,21 @@ the effectiveness of a cricket shot played based on bowler, ball type, and
 other such conditions. Ball-by-ball data was scraped from ESPN Cricinfo and
 a novel approach was developed for assigning an *effectiveness scale* to
 each shot based on ball type, outcome, and other contextual conditions.
-`scikit-learn`, `XGBoost`, `CatBoost`, and a Keras MLP are used to fit and
-compare regressors over the resulting dataset.
+`scikit-learn`, `XGBoost`, `CatBoost`, `LightGBM`, and a Keras MLP are
+used to fit and compare regressors over the resulting dataset.
 
-The end-to-end pipeline today lives in [`SDP.ipynb`](SDP.ipynb):
+### Pipeline
 
-1. Load multi-sheet Excel data into per-sheet DataFrames.
-2. Reshape the *control sheet* (one column block per ball type) into
-   per-ball-type shot frames.
-3. Stack all `<team>_vs_<team>` match sheets and clean missing values, bad
-   categorical codes, and inconsistent column names.
-4. Engineer per-batsman aggregate features (off-side, leg-side, bouncy
-   track, aggressive shots, defensive shots, spin, control).
-5. Filter categorical features by chi-square against the target.
-6. Encode + scale and split into train/test.
-7. Cross-validate eight regressors (SVR, Linear, RF, XGB, GBM, DT,
-   CatBoost), then hyper-parameter-tune the best ones.
-8. Train and evaluate a Keras MLP for comparison.
-
-> **Note:** the modeling pipeline has known issues (target leakage in the
-> aggregate features, hyper-parameter selection on the test set, pre-split
-> `fit_transform`) that are tracked in the repository's improvement plan
-> and will be addressed in subsequent PRs. The reported numbers in the
-> notebook today should be treated as preliminary.
+1. **Scrape** — ball-by-ball data from ESPN Cricinfo (`cricket-analytics scrape`).
+2. **Prepare** — clean, validate, and engineer leak-free features (`cricket-analytics prepare`).
+3. **Train** — nested cross-validation across classical + deep-learning models (`cricket-analytics train`).
+4. **Evaluate** — compare models on held-out test set (`cricket-analytics evaluate`).
 
 ## Dataset
 
-The notebook expects a workbook named **`Cricket Data Set.xlsx`** in the
-repository root, with sheets:
-
-- one *control sheet* (shot-by-ball-type cross-tab)
-- one *parameters* sheet (ball-symbol / shot-symbol / dismissal-symbol
-  legends)
-- one *analysis_parameters* sheet
-- one sheet per match, named `<team1>_vs_<team2>` (e.g. `IND_vs_AFG`)
-  containing ball-by-ball rows.
-
-The source dataset is **not committed** to this repo. See
+The scraper targets ESPN Cricinfo ball-by-ball commentary to build the
+dataset automatically. The legacy `Cricket Data Set.xlsx` format is also
+supported via the backward-compatible loader. See
 [`data/README.md`](data/README.md) for the expected schema and provenance.
 
 ## Setup
@@ -64,50 +42,62 @@ cd CricketAnalytics
 python -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
 
-# 3. Install dependencies
+# 3. Install the package in editable mode
 pip install --upgrade pip
-pip install -r requirements.txt
-
-# 4. Register the Jupyter kernel used by the notebook
-python -m ipykernel install --user --name sdp --display-name "Python (sdp)"
+pip install -e ".[dev,notebook]"
 ```
-
-Place your `Cricket Data Set.xlsx` in the repo root (it is `.gitignore`d so
-it will not be committed accidentally).
 
 ## Run
 
 ```bash
-# Open the notebook in JupyterLab and run all cells
-jupyter lab SDP.ipynb
+# CLI commands
+cricket-analytics scrape --config configs/scraper.yaml
+cricket-analytics prepare
+cricket-analytics train
+cricket-analytics evaluate <model_path>
+
+# Or explore interactively
+jupyter lab notebooks/SDP.ipynb
 ```
 
-Alternatively, execute the notebook headlessly:
-
-```bash
-pip install papermill
-papermill SDP.ipynb out.ipynb
-```
-
-## Repository layout
+## Repository Layout
 
 ```
 .
-├── README.md              # this file
-├── LICENSE                # MIT
-├── requirements.txt       # pinned Python dependencies
+├── pyproject.toml                 # project metadata & dependencies
+├── README.md
+├── LICENSE                        # MIT
 ├── .gitignore
-├── SDP.ipynb              # end-to-end notebook
-└── data/
-    └── README.md          # dataset schema & provenance
+├── configs/
+│   ├── scraper.yaml               # scraper targets & settings
+│   └── train.yaml                 # training hyperparameters & config
+├── src/
+│   └── cricket_analytics/
+│       ├── __init__.py
+│       ├── cli.py                 # Typer CLI entry point
+│       ├── scraper/               # ESPN Cricinfo scraper
+│       ├── data/                  # loading, cleaning, feature engineering
+│       ├── models/                # classical ML + deep learning pipelines
+│       └── visualisation/         # plots & charts
+├── notebooks/
+│   └── SDP.ipynb                  # legacy exploration notebook
+├── tests/                         # pytest suite
+├── data/
+│   ├── README.md                  # dataset schema & provenance
+│   ├── raw/                       # scraped data (gitignored)
+│   ├── interim/                   # cleaned intermediate data (gitignored)
+│   └── processed/                 # model-ready features (gitignored)
+└── .github/
+    └── workflows/
+        └── ci.yml                 # lint + test on push/PR
 ```
 
 ## Results
 
-The notebook currently reports cross-validated MAE for eight baseline
-regressors and tuned R² scores for Random Forest, XGBoost, Decision Tree,
-CatBoost, and the Keras MLP. Numbers will be re-reported here after the
-pipeline-correctness PRs land — see the improvement plan for details.
+Model comparison results will be reported here once the full pipeline is
+operational. The legacy notebook (`notebooks/SDP.ipynb`) contains
+preliminary results with known methodological issues (see the overhaul
+plan for details).
 
 ## License
 

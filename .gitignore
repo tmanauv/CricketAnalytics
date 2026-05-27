@@ -53,8 +53,8 @@ matches_df.csv
 trainresults.csv
 valresults.csv
 
-# Model artifacts
-models/
+# Model artifacts (only top-level models/ directory, not src subpackages)
+/models/
 *.pkl
 *.joblib
 *.cbm
