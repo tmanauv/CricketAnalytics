@@ -1,0 +1,29 @@
+# Core data / numerics
+pandas>=2.0,<3.0
+numpy>=1.24,<3.0
+scipy>=1.10,<2.0
+openpyxl>=3.1,<4.0
+
+# Classical ML
+# Pinned <1.6 because the notebook uses
+# `mean_squared_error(..., squared=False)`, removed in scikit-learn 1.6.
+# That call site is fixed in PR-04; this constraint can be relaxed then.
+scikit-learn>=1.3,<1.6
+xgboost>=2.0,<3.0
+catboost>=1.2,<2.0
+
+# Deep learning
+# Pinned <2.16 to stay on Keras 2.x, where `Adam(lr=...)` still works.
+# The notebook is updated to `learning_rate=...` in PR-04; this constraint
+# can be relaxed then.
+tensorflow>=2.13,<2.16
+scikeras>=0.12,<0.14
+
+# Plotting
+matplotlib>=3.7,<4.0
+seaborn>=0.12,<1.0
+
+# Notebook runtime
+jupyterlab>=4.0,<5.0
+ipykernel>=6.25,<7.0
+ipython>=8.14,<9.0
