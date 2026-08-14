@@ -13,10 +13,11 @@ def split_variable_types(df: pd.DataFrame) -> tuple[list[str], list[str]]:
     categorical: list[str] = []
     continuous: list[str] = []
     for column in df.columns:
-        if df[column].dtype != "object":
-            continuous.append(column)
-        else:
+        dtype = df[column].dtype
+        if pd.api.types.is_object_dtype(dtype) or pd.api.types.is_string_dtype(dtype):
             categorical.append(column)
+        else:
+            continuous.append(column)
     return categorical, continuous
 
 
