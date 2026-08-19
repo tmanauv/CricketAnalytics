@@ -86,8 +86,18 @@ tracked as PR-10e in the improvement plan
 already have the workbook should either:
 
 - request it directly from the project author, or
-- generate a small synthetic fixture for testing (this is the approach
-  PR-02 will take for CI).
+- generate a synthetic fixture with the committed generator:
+
+```bash
+python tools/make_synthetic_dataset.py --output "Cricket Data Set.xlsx"
+python tools/make_synthetic_dataset.py --output data/invalid.xlsx --invalid
+```
+
+The generator reproduces the sheet layout, column names, and value
+domains documented above (`--invalid` additionally injects malformed rows
+for exercising the cleaning error paths). It is what CI runs against, so
+the schema above is enforced by `tests/test_synthetic_dataset.py` rather
+than only described here.
 
 ## Layout convention going forward
 

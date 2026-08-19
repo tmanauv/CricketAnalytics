@@ -32,7 +32,7 @@ The end-to-end pipeline today lives in [`SDP.ipynb`](SDP.ipynb):
 
 > **Note:** the modeling pipeline has known issues (target leakage in the
 > aggregate features, hyper-parameter selection on the test set, pre-split
-> `fit_transform`) that are tracked in the repository's improvement plan
+> `fit_transform`) that are tracked in [`ROADMAP.md`](ROADMAP.md)
 > and will be addressed in subsequent PRs. The reported numbers in the
 > notebook today should be treated as preliminary.
 
@@ -50,6 +50,11 @@ repository root, with sheets:
 
 The source dataset is **not committed** to this repo. See
 [`data/README.md`](data/README.md) for the expected schema and provenance.
+To work without it, generate a schema-faithful synthetic workbook:
+
+```bash
+python tools/make_synthetic_dataset.py --output "Cricket Data Set.xlsx"
+```
 
 ## Setup
 
@@ -94,10 +99,14 @@ papermill SDP.ipynb out.ipynb
 ```
 .
 ├── README.md              # this file
+├── ROADMAP.md             # end goal and phased plan
 ├── LICENSE                # MIT
 ├── requirements.txt       # pinned Python dependencies
 ├── .gitignore
 ├── SDP.ipynb              # end-to-end notebook
+├── tools/
+│   └── make_synthetic_dataset.py   # schema-faithful fixture generator
+├── tests/                 # fixture schema tests (run in CI)
 └── data/
     └── README.md          # dataset schema & provenance
 ```
@@ -107,7 +116,7 @@ papermill SDP.ipynb out.ipynb
 The notebook currently reports cross-validated MAE for eight baseline
 regressors and tuned R² scores for Random Forest, XGBoost, Decision Tree,
 CatBoost, and the Keras MLP. Numbers will be re-reported here after the
-pipeline-correctness PRs land — see the improvement plan for details.
+pipeline-correctness PRs land — see [`ROADMAP.md`](ROADMAP.md) for details.
 
 ## License
 
