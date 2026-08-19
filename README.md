@@ -94,6 +94,21 @@ pip install papermill
 papermill SDP.ipynb out.ipynb
 ```
 
+### Leak-free study, without the notebook
+
+`cricket_analytics.modeling` runs the same study with grouped splits and
+all preprocessing inside the fold (see [`ROADMAP.md`](ROADMAP.md), Phase 2):
+
+```python
+from cricket_analytics.modeling import matches_frame_from_workbook, run_study
+
+matches = matches_frame_from_workbook("Cricket Data Set.xlsx")
+print(run_study(matches))  # grouped-CV R² per model, plus held-out test metrics
+```
+
+These numbers are lower than the notebook's, and comparable to a
+predict-the-mean baseline, which the notebook never reported.
+
 ## Repository layout
 
 ```
@@ -104,9 +119,12 @@ papermill SDP.ipynb out.ipynb
 ├── requirements.txt       # pinned Python dependencies
 ├── .gitignore
 ├── SDP.ipynb              # end-to-end notebook
+├── pyproject.toml         # package metadata, pytest and ruff config
+├── src/cricket_analytics/
+│   └── modeling/          # leak-free features, pipeline, study
 ├── tools/
 │   └── make_synthetic_dataset.py   # schema-faithful fixture generator
-├── tests/                 # fixture schema tests (run in CI)
+├── tests/                 # fixture, modelling and leakage tests (run in CI)
 └── data/
     └── README.md          # dataset schema & provenance
 ```
