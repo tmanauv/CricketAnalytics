@@ -1,0 +1,68 @@
+# Training configuration
+
+random_state: 42
+test_size: 0.20
+cv_folds: 5
+
+# Feature engineering
+features:
+  categorical_encoding: target  # "target" | "onehot"
+  batsman_agg_groups:
+    off_side: [DR, C, RS]
+    leg_side: [P, ODR, LG, F, S]
+    bouncy_track: [D, P, C, L]
+    aggressive: [Dr, C, P, Sw, RS, ODR, F, R, LG, SC]
+    defense: [D, L]
+    spin: [D, Dr, C, P, Sw, RS, ODR, F, R, LG, SC]
+  spin_ball_types: [GY, LB]
+
+# Classical models to train
+classical_models:
+  svr:
+    param_grid:
+      kernel: [rbf, linear]
+      C: [0.1, 1.0, 10.0]
+  random_forest:
+    param_grid:
+      max_depth: [5, 8, 10, 15]
+      n_estimators: [50, 100, 200]
+      min_samples_split: [2, 5, 10]
+  xgboost:
+    param_grid:
+      max_depth: [3, 5, 7, 9]
+      n_estimators: [50, 100, 200]
+      learning_rate: [0.01, 0.1, 0.2]
+      subsample: [0.6, 0.8, 1.0]
+  gradient_boosting:
+    param_grid:
+      max_depth: [3, 5, 7]
+      n_estimators: [50, 100, 200]
+      learning_rate: [0.01, 0.1, 0.2]
+  decision_tree:
+    param_grid:
+      max_depth: [null, 5, 10]
+      min_samples_split: [2, 5, 10]
+      min_samples_leaf: [1, 2, 4]
+  catboost:
+    param_grid:
+      depth: [6, 8, 10]
+      learning_rate: [0.01, 0.05, 0.1]
+      iterations: [50, 100, 200]
+  lightgbm:
+    param_grid:
+      max_depth: [3, 5, 7]
+      n_estimators: [50, 100, 200]
+      learning_rate: [0.01, 0.1, 0.2]
+  elastic_net:
+    param_grid:
+      alpha: [0.01, 0.1, 1.0]
+      l1_ratio: [0.1, 0.5, 0.9]
+
+# Deep learning config
+deep_learning:
+  hidden_layers: [128, 64, 32]
+  dropout: 0.2
+  learning_rate: 0.001
+  batch_size: 32
+  epochs: 500
+  patience: 30

@@ -1,0 +1,14 @@
+# ESPN Cricinfo scraper configuration
+# Add series/match URLs to scrape ball-by-ball data
+
+output_dir: data/raw
+format: ndjson
+
+# Rate-limit (seconds between requests)
+delay: 2.0
+
+# Target series — add ESPN Cricinfo series URLs here
+series: []
+
+# Individual match URLs (alternative to full series)
+matches: []
