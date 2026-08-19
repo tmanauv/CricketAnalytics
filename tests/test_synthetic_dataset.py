@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+
 from make_synthetic_dataset import (
     BALL_TYPES,
     DISMISSAL_KINDS,

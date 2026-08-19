@@ -53,7 +53,7 @@ Derived from the current notebook and the open PRs:
 
 Each phase is one or more PRs that land independently on `main`.
 
-### Phase 0 — reproducible fixture (this PR)
+### Phase 0 — reproducible fixture (done, #13)
 
 `tools/make_synthetic_dataset.py` generates a schema-faithful
 `Cricket Data Set.xlsx` (control sheet with three-column ball-type
@@ -82,7 +82,7 @@ The older #3/#4 pair (`pyproject.toml` scaffold, Cricinfo scraper) is a
 parallel lineage of the same plan; its scaffold is superseded by #11/#12
 and its scraper is folded into Phase 4.
 
-### Phase 2 — statistically defensible modelling
+### Phase 2 — statistically defensible modelling (this PR)
 
 The core of the end goal. A `cricket_analytics.modeling` layer that:
 
@@ -99,7 +99,14 @@ The core of the end goal. A `cricket_analytics.modeling` layer that:
 
 Expect the reported R² to drop sharply relative to the notebook. That is
 the point: the notebook's numbers are inflated by leakage and by tuning
-on the test set.
+on the test set. `tests/test_leakage_regression.py` pins this down — on a
+dataset whose target is pure noise the notebook's recipe still reports
+R² > 0.15, while the pipeline here stays at or below zero.
+
+One further column of leakage is removed here rather than fixed: `Wicket`
+and `Dismissal kind` are dropped from the feature set, because
+`Effectiveness` is `-1.0` exactly when the ball is a wicket, so they hand
+a model the answer for every negative target.
 
 ### Phase 3 — deep-learning comparison, repaired
 
