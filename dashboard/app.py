@@ -32,6 +32,26 @@ def cv_frame(results: dict) -> pd.DataFrame:
     return frame
 
 
+def cv_chart(plottable: pd.DataFrame, metric: str) -> alt.Chart:
+    baseline = plottable["cv_mae"].min() / 2
+    return (
+        alt.Chart(plottable.assign(baseline=baseline))
+        .mark_bar()
+        .encode(
+            x=alt.X("cv_mae:Q", title=f"CV {metric} (log scale)", scale=alt.Scale(type="log")),
+            x2="baseline:Q",
+            y=alt.Y("model:N", sort=plottable["model"].tolist(), title=None, axis=alt.Axis(labelLimit=250)),
+            color=alt.condition(alt.datum.rank == 1, alt.value("#2e7d32"), alt.value("#90a4ae")),
+            tooltip=[
+                alt.Tooltip("model:N", title="Model"),
+                alt.Tooltip("estimator:N", title="Estimator"),
+                alt.Tooltip("cv_mae:Q", title=f"CV {metric}", format=".4g"),
+            ],
+        )
+        .properties(height=40 * len(plottable))
+    )
+
+
 def render_cv(results: dict) -> None:
     cv = results["cv"]
     frame = cv_frame(results)
@@ -40,32 +60,17 @@ def render_cv(results: dict) -> None:
         st.info("No cross-validation results recorded in the notebook outputs.")
         return
 
-    # A log axis keeps Linear Regression's ~1e10 MAE from flattening the rest, but needs positive values.
-    log_scale = bool((frame["cv_mae"] > 0).all())
-    scale_note = "the axis is log-scaled" if log_scale else "the axis is linear because a model scored 0"
-    st.caption(f"{cv['description']} Lower is better; {scale_note}.")
-    baseline = frame["cv_mae"].min() / 2 if log_scale else 0.0
-    chart = (
-        alt.Chart(frame.assign(baseline=baseline))
-        .mark_bar()
-        .encode(
-            x=alt.X(
-                "cv_mae:Q",
-                title=f"CV {cv['metric']}" + (" (log scale)" if log_scale else ""),
-                scale=alt.Scale(type="log" if log_scale else "linear"),
-            ),
-            x2="baseline:Q",
-            y=alt.Y("model:N", sort=frame["model"].tolist(), title=None, axis=alt.Axis(labelLimit=250)),
-            color=alt.condition(alt.datum.rank == 1, alt.value("#2e7d32"), alt.value("#90a4ae")),
-            tooltip=[
-                alt.Tooltip("model:N", title="Model"),
-                alt.Tooltip("estimator:N", title="Estimator"),
-                alt.Tooltip("cv_mae:Q", title=f"CV {cv['metric']}", format=".4g"),
-            ],
-        )
-        .properties(height=40 * len(frame))
-    )
-    st.altair_chart(chart, width="stretch")
+    # A log axis keeps Linear Regression's ~1e10 MAE from flattening the rest; it can only plot positive values.
+    plottable = frame[frame["cv_mae"].between(0, float("inf"), inclusive="neither")]
+    excluded = frame.loc[~frame.index.isin(plottable.index), "model"].tolist()
+    caption = f"{cv['description']} Lower is better; the axis is log-scaled."
+    if excluded:
+        caption += f" Not plotted (zero or non-finite MAE, see table): {', '.join(excluded)}."
+    st.caption(caption)
+    if plottable.empty:
+        st.info("No positive, finite CV scores to plot.")
+    else:
+        st.altair_chart(cv_chart(plottable, cv["metric"]), width="stretch")
     st.dataframe(
         frame.rename(
             columns={
