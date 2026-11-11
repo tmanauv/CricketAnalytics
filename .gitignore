@@ -54,7 +54,7 @@ trainresults.csv
 valresults.csv
 
 # Model artifacts
-models/
+/models/
 *.pkl
 *.joblib
 *.cbm
@@ -63,7 +63,7 @@ models/
 *.onnx
 
 # Reports / experiment tracking
-reports/
+/reports/
 mlruns/
 wandb/
 .optuna/

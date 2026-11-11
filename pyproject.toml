@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cricket-analytics"
+version = "0.1.0"
+description = "Predict the effectiveness of a cricket shot from ball-by-ball match data."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+dependencies = [
+    "pandas>=2.0,<3.0",
+    "numpy>=1.24,<3.0",
+    "scipy>=1.10,<2.0",
+    "openpyxl>=3.1,<4.0",
+    "scikit-learn>=1.3,<1.6",
+    "xgboost>=2.0,<3.0",
+    "catboost>=1.2,<2.0",
+    "matplotlib>=3.7,<4.0",
+    "seaborn>=0.12,<1.0",
+    "pyyaml>=6.0,<7.0",
+    "joblib>=1.3",
+]
+
+[project.scripts]
+cricket-analytics = "cricket_analytics.cli:main"
+
+[project.optional-dependencies]
+dl = [
+    "tensorflow>=2.13,<2.16",
+]
+notebook = [
+    "jupyterlab>=4.0,<5.0",
+    "ipykernel>=6.25,<7.0",
+    "scikeras>=0.12,<0.14",
+]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "ruff>=0.4",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+extend-exclude = ["notebooks"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["cricket_analytics"]
