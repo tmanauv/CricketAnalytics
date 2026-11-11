@@ -1,0 +1,96 @@
+# Default configuration for the CricketAnalytics pipeline.
+# All paths are relative to the repository root.
+
+paths:
+  workbook: data/raw/Cricket Data Set.xlsx
+  interim_dir: data/interim
+  processed_dir: data/processed
+  models_dir: models
+  reports_dir: reports
+
+cleaning:
+  # Columns dropped from every match sheet when they contain missing values.
+  unary_columns: [Pitch Type, Match ID]
+  # Flag columns coerced to 0.0 / 1.0 (present => 1.0).
+  binary_columns: [Wide, No ball, Wicket, Hit the Bat]
+  column_renames:
+    Player Name: Batsman Name
+    Player ID: Batsman Player ID
+    Bowler: Bowler Name
+    Player ID.1: Bowler Player ID
+    X: Effectiveness
+  # Free-text dismissal entries observed in the source workbook.
+  dismissal_aliases:
+    Leg Stump: B
+    Stump Out: St
+    C: Ct
+  batsman_name_corrections:
+    Kedar Jadhav: Kedhar Jadhav
+    Shikar Dhawan: Shikhar Dhawan
+
+features:
+  target: Effectiveness
+  # Per-batsman aggregate scores: share of balls played with a shot from the
+  # group multiplied by the mean effectiveness of those shots.
+  score_groups:
+    off_side:
+      shots: [DR, C, RS]
+    leg_side:
+      shots: [P, ODR, LG, F, S]
+    bouncy_track:
+      shots: [D, P, C, L]
+    aggressive:
+      shots: [DR, C, P, SW, RS, ODR, F, R, LG, SC]
+    defense:
+      shots: [D, L]
+    spin_ball:
+      shots: [D, DR, C, P, SW, RS, ODR, F, R, LG, SC]
+      ball_types: [GY, LB]
+    control:
+      controlled_only: true
+  # Categorical columns whose chi-square p-value against the target exceeds
+  # this threshold are dropped.
+  chi2_alpha: 0.05
+  # Extra columns to exclude from the model inputs.
+  drop_columns: []
+
+split:
+  test_size: 0.2
+  random_state: 42
+
+baselines:
+  cv_folds: 5
+  scoring: neg_mean_absolute_error
+  models: [svr, linear, random_forest, xgboost, gradient_boosting, decision_tree, catboost]
+
+tuning:
+  cv_folds: 5
+  scoring: r2
+  random_state: 12345
+  grids:
+    random_forest:
+      max_depth: [3, 5, 8, 10, 12, 15]
+      n_estimators: [5, 9, 12, 15, 19]
+    xgboost:
+      max_depth: [3, 6, 9]
+      n_estimators: [10, 50, 100]
+      learning_rate: [0.1, 0.2, 0.3]
+      subsample: [0.6, 0.8, 1.0]
+      colsample_bytree: [0.6, 0.8, 1.0]
+    decision_tree:
+      max_depth: [null, 5, 10]
+      min_samples_split: [2, 5, 10]
+      min_samples_leaf: [1, 2, 4]
+    catboost:
+      depth: [6, 8, 10]
+      learning_rate: [0.01, 0.05, 0.1]
+      iterations: [30, 50, 100]
+
+mlp:
+  hidden_units: [128, 32, 8]
+  learning_rate: 0.001
+  epochs: 500
+  batch_size: 100
+  patience: 50
+  validation_split: 0.2
+  random_state: 42
