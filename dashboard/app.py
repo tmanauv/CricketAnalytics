@@ -36,18 +36,24 @@ def render_cv(results: dict) -> None:
     cv = results["cv"]
     frame = cv_frame(results)
     st.subheader(f"Cross-validated {cv['metric']} ({cv['folds']}-fold)")
-    st.caption(cv["description"] + " Lower is better; the axis is log-scaled.")
     if frame.empty:
         st.info("No cross-validation results recorded in the notebook outputs.")
         return
 
-    # Log-scaled bars need a positive baseline; Linear Regression's MAE is ~1e10.
-    baseline = frame["cv_mae"].min() / 2
+    # A log axis keeps Linear Regression's ~1e10 MAE from flattening the rest, but needs positive values.
+    log_scale = bool((frame["cv_mae"] > 0).all())
+    scale_note = "the axis is log-scaled" if log_scale else "the axis is linear because a model scored 0"
+    st.caption(f"{cv['description']} Lower is better; {scale_note}.")
+    baseline = frame["cv_mae"].min() / 2 if log_scale else 0.0
     chart = (
         alt.Chart(frame.assign(baseline=baseline))
         .mark_bar()
         .encode(
-            x=alt.X("cv_mae:Q", title=f"CV {cv['metric']} (log scale)", scale=alt.Scale(type="log")),
+            x=alt.X(
+                "cv_mae:Q",
+                title=f"CV {cv['metric']}" + (" (log scale)" if log_scale else ""),
+                scale=alt.Scale(type="log" if log_scale else "linear"),
+            ),
             x2="baseline:Q",
             y=alt.Y("model:N", sort=frame["model"].tolist(), title=None, axis=alt.Axis(labelLimit=250)),
             color=alt.condition(alt.datum.rank == 1, alt.value("#2e7d32"), alt.value("#90a4ae")),
