@@ -17,8 +17,12 @@ RESULTS_PATH = Path(__file__).resolve().parents[1] / "results" / "model_results.
 
 
 @st.cache_data
-def load_results(path: Path = RESULTS_PATH) -> dict:
+def _read_results(path: Path, mtime: float) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def load_results(path: Path = RESULTS_PATH) -> dict:
+    return _read_results(path, path.stat().st_mtime)
 
 
 def cv_frame(results: dict) -> pd.DataFrame:
