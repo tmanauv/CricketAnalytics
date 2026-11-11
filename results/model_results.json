@@ -1,0 +1,62 @@
+{
+  "source": "SDP.ipynb",
+  "cv": {
+    "metric": "MAE",
+    "folds": 5,
+    "description": "5-fold cross-validated mean absolute error on the training split.",
+    "models": [
+      {
+        "model": "Decision Tree Regressor",
+        "estimator": "DecisionTreeRegressor",
+        "cv_mae": 0.029264705882353144,
+        "cell": 88
+      },
+      {
+        "model": "Random Forest",
+        "estimator": "RandomForestRegressor",
+        "cv_mae": 0.04142647058823548,
+        "cell": 88
+      },
+      {
+        "model": "XGBoost",
+        "estimator": "XGBRegressor",
+        "cv_mae": 0.04478300510618069,
+        "cell": 88
+      },
+      {
+        "model": "Cat Boost Regressor",
+        "estimator": "CatBoostRegressor",
+        "cv_mae": 0.04878898138180454,
+        "cell": 88
+      },
+      {
+        "model": "GradientBoosting Regressor",
+        "estimator": "GradientBoostingRegressor",
+        "cv_mae": 0.07065985749796871,
+        "cell": 88
+      },
+      {
+        "model": "SVM",
+        "estimator": "SVR",
+        "cv_mae": 0.21556857131932508,
+        "cell": 88
+      },
+      {
+        "model": "Linear Regression",
+        "estimator": "LinearRegression",
+        "cv_mae": 31574708513.996727,
+        "cell": 88
+      }
+    ]
+  },
+  "tuned": {
+    "metric": "R2",
+    "description": "Held-out R\u00b2 of the hyper-parameter-tuned models.",
+    "models": []
+  },
+  "mlp": {
+    "metric": "MSE",
+    "description": "10-fold cross-validated MSE of the Keras MLP.",
+    "variants": []
+  }
+}

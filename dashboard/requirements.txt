@@ -1,0 +1,4 @@
+# Dashboard-only dependencies; the notebook stack in ../requirements.txt is not needed.
+streamlit>=1.46,<2.0
+pandas>=2.0,<3.0
+altair>=5.0,<7.0
