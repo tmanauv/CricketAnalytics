@@ -15,7 +15,7 @@ import re
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_NOTEBOOK = REPO_ROOT / "SDP.ipynb"
+DEFAULT_NOTEBOOK = REPO_ROOT / "notebooks" / "SDP.ipynb"
 DEFAULT_OUTPUT = REPO_ROOT / "results" / "model_results.json"
 
 CV_MAE_LINE = re.compile(r"^(?P<label>.+?) mean absolute error:\s*(?P<value>\S+)\s*$")
@@ -122,11 +122,14 @@ def extract_results(notebook: dict) -> dict:
 
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--notebook", type=Path, default=DEFAULT_NOTEBOOK)
+    parser.add_argument("--notebook", type=Path)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     args = parser.parse_args(argv)
 
-    notebook = json.loads(args.notebook.read_text(encoding="utf-8"))
+    notebook_path = args.notebook
+    if notebook_path is None:
+        notebook_path = DEFAULT_NOTEBOOK if DEFAULT_NOTEBOOK.is_file() else REPO_ROOT / "SDP.ipynb"
+    notebook = json.loads(notebook_path.read_text(encoding="utf-8"))
     results = extract_results(notebook)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(results, indent=2) + "\n", encoding="utf-8")

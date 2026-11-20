@@ -92,7 +92,8 @@ def render_tuned(results: dict) -> None:
     if not tuned["models"]:
         st.info(
             "Tuned R² scores are not saved in the committed notebook outputs. "
-            "Re-run `SDP.ipynb` with the workbook, then `python tools/extract_results.py`."
+            "Re-run `notebooks/SDP.ipynb` (or root `SDP.ipynb` in older layouts) "
+            "with the workbook, then `python tools/extract_results.py`."
         )
         return
     frame = pd.DataFrame(tuned["models"], columns=["estimator", "r2"])
@@ -105,7 +106,8 @@ def render_mlp(results: dict) -> None:
     if not mlp["variants"]:
         st.info(
             "Keras MLP scores are not saved in the committed notebook outputs. "
-            "Re-run `SDP.ipynb` with the workbook, then `python tools/extract_results.py`."
+            "Re-run `notebooks/SDP.ipynb` (or root `SDP.ipynb` in older layouts) "
+            "with the workbook, then `python tools/extract_results.py`."
         )
         return
     st.dataframe(pd.DataFrame(mlp["variants"], columns=["variant", "mse", "std"]), hide_index=True)

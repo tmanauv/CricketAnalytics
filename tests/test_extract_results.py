@@ -2,9 +2,12 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "tools"))
 
+import extract_results as extractor
 from extract_results import extract_results, main
 
 
@@ -67,3 +70,30 @@ def test_committed_results_match_notebook(tmp_path):
     main(["--output", str(out)])
     committed = json.loads((REPO_ROOT / "results" / "model_results.json").read_text())
     assert json.loads(out.read_text()) == committed
+
+
+@pytest.mark.parametrize("layout", ["root", "notebooks", "both", "missing", "explicit", "explicit_missing"])
+def test_notebook_path_selection(tmp_path, monkeypatch, layout):
+    monkeypatch.setattr(extractor, "REPO_ROOT", tmp_path)
+    preferred = tmp_path / "notebooks" / "SDP.ipynb"
+    monkeypatch.setattr(extractor, "DEFAULT_NOTEBOOK", preferred)
+    preferred.parent.mkdir()
+    root = tmp_path / "SDP.ipynb"
+    if layout != "missing":
+        root.write_text(json.dumps({"cells": []}))
+    if layout in {"notebooks", "both", "explicit", "explicit_missing"}:
+        preferred.write_text(json.dumps({"cells": [_code("", [_stream("SVM mean absolute error: 0.2")])]}))
+        if layout == "notebooks":
+            root.unlink()
+    out = tmp_path / "results.json"
+    args = ["--output", str(out)]
+    if layout.startswith("explicit"):
+        args += ["--notebook", str(root if layout == "explicit" else tmp_path / "missing.ipynb")]
+    if layout in {"missing", "explicit_missing"}:
+        with pytest.raises(FileNotFoundError):
+            main(args)
+        assert not out.exists()
+    else:
+        main(args)
+        models = json.loads(out.read_text())["cv"]["models"]
+        assert len(models) == (1 if layout in {"notebooks", "both"} else 0)
