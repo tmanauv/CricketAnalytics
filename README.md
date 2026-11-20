@@ -105,10 +105,12 @@ streamlit run dashboard/app.py
 After re-running the notebook, refresh the results file from its saved
 outputs. The extractor prefers `notebooks/SDP.ipynb` and falls back to
 `SDP.ipynb` at the repository root for older layouts. Use `--notebook PATH`
-to extract from another notebook:
+to extract from another notebook, e.g. the output of the headless
+`papermill` run above:
 
 ```bash
 python tools/extract_results.py
+python tools/extract_results.py --notebook out.ipynb
 ```
 
 ## Repository layout
