@@ -97,3 +97,11 @@ def test_notebook_path_selection(tmp_path, monkeypatch, layout):
         main(args)
         models = json.loads(out.read_text())["cv"]["models"]
         assert len(models) == (1 if layout in {"notebooks", "both"} else 0)
+
+
+def test_source_records_extracted_notebook(tmp_path):
+    notebook = tmp_path / "out.ipynb"
+    notebook.write_text(json.dumps({"cells": []}))
+    out = tmp_path / "results.json"
+    main(["--notebook", str(notebook), "--output", str(out)])
+    assert json.loads(out.read_text())["source"] == str(notebook.resolve())

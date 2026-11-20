@@ -51,7 +51,7 @@ def _output_text(cell: dict) -> list[str]:
     return texts
 
 
-def extract_results(notebook: dict) -> dict:
+def extract_results(notebook: dict, source: str = "SDP.ipynb") -> dict:
     cv_mae: dict[str, dict] = {}
     tuned_r2: dict[str, dict] = {}
     mlp_cv_mse: dict[str, dict] = {}
@@ -59,7 +59,7 @@ def extract_results(notebook: dict) -> dict:
     for index, cell in enumerate(notebook.get("cells", [])):
         if cell.get("cell_type") != "code":
             continue
-        source = _source(cell)
+        cell_source = _source(cell)
         outputs = _output_text(cell)
 
         for line in "\n".join(outputs).splitlines():
@@ -83,8 +83,8 @@ def extract_results(notebook: dict) -> dict:
                     "cell": index,
                 }
 
-        estimator = TUNED_MODEL.search(source)
-        if estimator and source.rstrip().endswith("r2_score(y_test, y_pred)"):
+        estimator = TUNED_MODEL.search(cell_source)
+        if estimator and cell_source.rstrip().endswith("r2_score(y_test, y_pred)"):
             for output in cell.get("outputs", []):
                 if output.get("output_type") != "execute_result":
                     continue
@@ -100,7 +100,7 @@ def extract_results(notebook: dict) -> dict:
                 }
 
     return {
-        "source": "SDP.ipynb",
+        "source": source,
         "cv": {
             "metric": "MAE",
             "folds": 5,
@@ -130,7 +130,11 @@ def main(argv: list[str] | None = None) -> None:
     if notebook_path is None:
         notebook_path = DEFAULT_NOTEBOOK if DEFAULT_NOTEBOOK.is_file() else REPO_ROOT / "SDP.ipynb"
     notebook = json.loads(notebook_path.read_text(encoding="utf-8"))
-    results = extract_results(notebook)
+    resolved = notebook_path.resolve()
+    source = (
+        resolved.relative_to(REPO_ROOT).as_posix() if resolved.is_relative_to(REPO_ROOT) else str(resolved)
+    )
+    results = extract_results(notebook, source=source)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(results, indent=2) + "\n", encoding="utf-8")
     print(f"Wrote {args.output}")
