@@ -89,6 +89,30 @@ pip install papermill
 papermill SDP.ipynb out.ipynb
 ```
 
+## Results dashboard
+
+A Streamlit dashboard summarises the final model results recorded in
+`SDP.ipynb` (cross-validated MAE per regressor, plus tuned R² and Keras MLP
+scores when they are present in the notebook outputs). It reads
+`results/model_results.json`, so it runs without the dataset or the
+TensorFlow stack:
+
+```bash
+pip install -r dashboard/requirements.txt
+streamlit run dashboard/app.py
+```
+
+After re-running the notebook, refresh the results file from its saved
+outputs. The extractor prefers `notebooks/SDP.ipynb` and falls back to
+`SDP.ipynb` at the repository root for older layouts. Use `--notebook PATH`
+to extract from another notebook, e.g. the output of the headless
+`papermill` run above:
+
+```bash
+python tools/extract_results.py
+python tools/extract_results.py --notebook out.ipynb
+```
+
 ## Repository layout
 
 ```
@@ -98,6 +122,12 @@ papermill SDP.ipynb out.ipynb
 ├── requirements.txt       # pinned Python dependencies
 ├── .gitignore
 ├── SDP.ipynb              # end-to-end notebook
+├── dashboard/             # Streamlit results dashboard
+├── results/
+│   └── model_results.json # model results extracted from SDP.ipynb
+├── tools/
+│   └── extract_results.py # notebook outputs -> results JSON
+├── tests/                 # pytest suite for the extractor
 └── data/
     └── README.md          # dataset schema & provenance
 ```
