@@ -101,7 +101,11 @@ def test_notebook_path_selection(tmp_path, monkeypatch, layout):
 
 def test_source_records_extracted_notebook(tmp_path):
     notebook = tmp_path / "out.ipynb"
-    notebook.write_text(json.dumps({"cells": []}))
+    notebook.write_text(
+        json.dumps({"cells": [_code("print(score)", [_stream("SVM mean absolute error: 0.2")])]})
+    )
     out = tmp_path / "results.json"
     main(["--notebook", str(notebook), "--output", str(out)])
-    assert json.loads(out.read_text())["source"] == str(notebook.resolve())
+    results = json.loads(out.read_text())
+    assert results["source"] == str(notebook.resolve())
+    assert [m["estimator"] for m in results["cv"]["models"]] == ["SVR"]
