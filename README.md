@@ -97,6 +97,7 @@ papermill SDP.ipynb out.ipynb
 ├── LICENSE                # MIT
 ├── requirements.txt       # pinned Python dependencies
 ├── .gitignore
+├── DUMMY_PR.md            # workflow-verification placeholder
 ├── SDP.ipynb              # end-to-end notebook
 └── data/
     └── README.md          # dataset schema & provenance
