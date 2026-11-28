@@ -26,7 +26,7 @@ The end-to-end pipeline today lives in [`SDP.ipynb`](SDP.ipynb):
    track, aggressive shots, defensive shots, spin, control).
 5. Filter categorical features by chi-square against the target.
 6. Encode + scale and split into train/test.
-7. Cross-validate eight regressors (SVR, Linear, RF, XGB, GBM, DT,
+7. Cross-validate seven regressors (SVR, Linear, RF, XGB, GBM, DT,
    CatBoost), then hyper-parameter-tune the best ones.
 8. Train and evaluate a Keras MLP for comparison.
 
@@ -98,13 +98,32 @@ papermill SDP.ipynb out.ipynb
 ├── requirements.txt       # pinned Python dependencies
 ├── .gitignore
 ├── SDP.ipynb              # end-to-end notebook
+├── cricket_analytics/     # shared utilities imported by the notebook
+│   ├── dataframes.py      # workbook loading, sheet filtering, inspection
+│   ├── features.py        # per-batsman aggregate scores
+│   └── modeling.py        # cross-validation, grid search, importance plots
+├── tests/                 # pytest suite for the shared utilities
 └── data/
     └── README.md          # dataset schema & provenance
 ```
 
+The notebook's repeated blocks (seven near-identical per-batsman scoring
+functions, per-regressor cross-validation, per-model feature-importance
+plots, nested hyper-parameter loops) live in `cricket_analytics/`; the
+notebook now supplies only what differs between them.
+
+## Tests
+
+The shared utilities are covered by a synthetic-fixture suite that needs no
+dataset:
+
+```bash
+pytest
+```
+
 ## Results
 
-The notebook currently reports cross-validated MAE for eight baseline
+The notebook currently reports cross-validated MAE for seven baseline
 regressors and tuned R² scores for Random Forest, XGBoost, Decision Tree,
 CatBoost, and the Keras MLP. Numbers will be re-reported here after the
 pipeline-correctness PRs land — see the improvement plan for details.
