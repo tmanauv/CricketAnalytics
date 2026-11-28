@@ -12,7 +12,7 @@ data/Cricket Data Set.xlsx
 
 Or, equivalently, place it at the repository root (the notebook currently
 reads `Cricket Data Set.xlsx` from the working directory). Either path is
-matched by `.gitignore`, so you cannot accidentally commit the workbook.
+matched by `.gitignore` (via `*.xlsx`), so you cannot accidentally commit the workbook.
 
 ## Expected schema
 
