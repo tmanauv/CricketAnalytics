@@ -7,12 +7,18 @@ This directory is the canonical location for the dataset used by
 ## Expected file
 
 ```
-data/Cricket Data Set.xlsx
+data/raw/Cricket Data Set.xlsx
 ```
 
-Or, equivalently, place it at the repository root (the notebook currently
-reads `Cricket Data Set.xlsx` from the working directory). Either path is
-matched by `.gitignore`, so you cannot accidentally commit the workbook.
+This is `paths.workbook` in `configs/default.yaml`; override it with
+`--workbook <path>` on any script. `*.xlsx` and `data/raw/` are matched by
+`.gitignore`, so you cannot accidentally commit the workbook.
+
+Without the real workbook, generate a synthetic one with the same layout:
+
+```bash
+python tools/make_synthetic_workbook.py   # writes data/raw/Cricket Data Set.xlsx
+```
 
 ## Expected schema
 
@@ -71,8 +77,9 @@ notebook: `IND_vs_AFG`, `ind_vs_afg`, etc. Expected columns include:
 | `Control`                       | `0.0` / `1.0`.                              |
 | `X` (Effectiveness)             | `0.0`–`1.0` step `0.1`, or `-1.0`. Renamed to `Effectiveness`. |
 
-The notebook's cleaning code (`clean_df`, `validate_column_values`) is the
-source of truth for the exact accepted values per column.
+`src/cricket_analytics/data/cleaning.py` (ported from the notebook's
+`clean_df` / `validate_column_values`) is the source of truth for the exact
+accepted values per column.
 
 ## Provenance
 
@@ -86,19 +93,15 @@ tracked as PR-10e in the improvement plan
 already have the workbook should either:
 
 - request it directly from the project author, or
-- generate a small synthetic fixture for testing (this is the approach
-  PR-02 will take for CI).
+- generate a synthetic fixture with `python tools/make_synthetic_workbook.py`
+  (also used by the tests and CI).
 
-## Layout convention going forward
+## Layout
 
 ```
 data/
 ├── README.md           # this file
-├── raw/                # untouched source files (gitignored)
-├── interim/            # intermediate cleaned outputs (gitignored)
-└── processed/          # model-ready feature tables (gitignored)
+├── raw/                # source workbook (gitignored)
+├── interim/            # `prepare` stage: matches.csv, legend.json, control/*.csv (gitignored)
+└── processed/          # `features` stage: train.csv, test.csv, batsman_scores.csv (gitignored)
 ```
-
-None of `raw/`, `interim/`, or `processed/` exist yet — they will be
-created by the package extraction in PR-05. The directories listed here
-are reserved so future PRs do not need to revisit `.gitignore`.
