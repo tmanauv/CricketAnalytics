@@ -13,11 +13,18 @@ xgboost>=2.0,<3.0
 catboost>=1.2,<2.0
 
 # Deep learning
-# Pinned <2.16 to stay on Keras 2.x, where `Adam(lr=...)` still works.
-# The notebook is updated to `learning_rate=...` in PR-04; this constraint
-# can be relaxed then.
-tensorflow>=2.13,<2.16
-scikeras>=0.12,<0.14
+# tensorflow>=2.16 moves to Keras 3, avoiding the known vulnerabilities in
+# Keras 2.15 (e.g. CVE-2025-12060 and multiple PYSEC advisories). The
+# notebook's `Adam(lr=..., decay=...)` call site has been updated for
+# Keras 3 accordingly.
+tensorflow>=2.19,<2.22
+# Floor on the first Keras 3 release with fixes for CVE-2025-12060 and the
+# PYSEC-2026-363x advisories.
+keras>=3.12.4,<4.0
+# scikeras 0.13 is the first release with Keras 3 support.
+scikeras>=0.13,<0.14
+# Floor above protobuf 4.25.x, which is affected by PYSEC-2026-1805.
+protobuf>=5.29.6
 
 # Plotting
 matplotlib>=3.7,<4.0
